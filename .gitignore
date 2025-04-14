@@ -1,0 +1,18 @@
+# Node.js
+frontend/node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+.DS_Store
+
+# Python backend (if using FastAPI, Flask, etc.)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+backend/venv/
+.idea/
+
+# VSCode project settings
+.vscode/
