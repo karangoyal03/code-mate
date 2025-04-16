@@ -15,20 +15,13 @@
   import { ChevronDownOutline } from "flowbite-svelte-icons";
 </script>
 
-<Navbar class="bg-sky-300">
+<Navbar class="bg-[#0076CE]">
   <NavBrand href="/">
     <span
       class="self-center whitespace-nowrap text-xl font-extrabold text-white"
       >Code-Mate</span
     >
   </NavBrand>
-  <button class="bg-sky-300 text-white font-[700]"
-    >Select a file</button
-  >
-  <Dropdown>
-    <DropdownItem>Dashboard</DropdownItem>
-    <DropdownItem>Settings</DropdownItem>
-  </Dropdown>
   <div class="flex items-center md:order-2">
     <Avatar id="avatar-menu">KG</Avatar>
   </div>
