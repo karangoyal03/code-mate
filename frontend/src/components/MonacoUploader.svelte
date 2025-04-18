@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as monaco from "monaco-editor";
+  import { code } from "../store/codeStore.js"; 
 
   let editorContainer: HTMLDivElement;
   let fileContent: string = "";
@@ -13,6 +14,7 @@
     const reader = new FileReader();
     reader.onload = (e) => {
       fileContent = e.target?.result as string;
+      code.set(fileContent);
       if (editor) {
         editor.setValue(fileContent);
       }
@@ -27,6 +29,16 @@
       theme: "vs-light",
       automaticLayout: true,
     });
+    editor.onDidChangeModelContent(() => {
+      const value = editor?.getValue() || "";
+      code.set(value);
+    });
+    const unsubscribe = code.subscribe((val) => {
+      if (editor && editor.getValue() !== val) {
+        editor.setValue(val);
+      }
+    });
+    return () => unsubscribe();
   });
   console.log("content", editor);
 </script>
@@ -43,7 +55,7 @@
 
 <style>
   .editor-container {
-    height: 70vh;
+    height: 90vh;
     width: 100%;
     border: 1px solid #ccc;
   }

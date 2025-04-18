@@ -4,6 +4,7 @@
   import MonacoUploader from "./components/MonacoUploader.svelte";
   import Navbar from "./components/navbar.svelte";
   import Agent from "./components/Agent.svelte";
+  import Bottom from "./components/Bottom.svelte";
 </script>
 
 <main>
@@ -17,4 +18,5 @@
       <Agent />
     </div>
   </div>
+  <Bottom />
 </main>
