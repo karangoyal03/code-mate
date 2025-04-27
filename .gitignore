@@ -11,8 +11,8 @@ __pycache__/
 *.pyo
 *.pyd
 env/
-backend/venv/
+backend/app/venv/
 .idea/
-
+backend/venv/
 # VSCode project settings
 .vscode/

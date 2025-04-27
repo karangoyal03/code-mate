@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+httpx
+python-dotenv
+vosk
+sounddevice
+pyautogui
+torch
+transformers
+datasets
+ffmpeg-python
+soundfile

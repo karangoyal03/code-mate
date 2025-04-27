@@ -1,51 +1,58 @@
 <script>
   import { code } from "../../store/codeStore.js";
   let data = "";
+
   async function fetchSuggestions() {
     const response = await fetch("http://localhost:8080/get-suggestions", {
       method: "POST",
-      body: JSON.stringify({
-        code: $code,
-      }),
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ code: $code }),
     });
-    // data = await response.json();
-    // data = data.choices[0].message.content;
-    //   return data;
-    if (response.ok) {
-      const reader = response.body
-        ?.pipeThrough(new TextDecoderStream())
-        .pipeThrough(splitstream("\n"))
-        .getReader();
-      newData = "";
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        const line = value.trim();
-        if (line.startsWith("data: ")) {
-          const jsonString = line.replace("/^data: /", "");
-          if (jsonString === "[DONE]") break;
-          try {
-            let result = JSON.parse(jsonString);
-            const content = result.choices?.[0]?.message.content || "";
-            newData += content;
-            data += newData;
-          } catch (e) {
-            console.error("Error parsing JSON:", e);
-          }
-        }
-      }
+    if (!response.ok || !response.body) {
+      console.error("No response body");
+      return;
     }
+    console.log("Response body:", response.json()); // Debugging line
+    // const reader = response.body.getReader();
+    // const decoder = new TextDecoder("utf-8");
+
+    // let buffer = "";
+
+    // while (true) {
+    //   const { done, value } = await reader.read();
+    //   if (done) break;
+
+    //   buffer += decoder.decode(value, { stream: true });
+
+    //   console.log("Buffer:", buffer); // Debugging line
+
+    //   // Split by newlines
+    //   const lines = buffer.split("\n");
+    //   buffer = lines.pop(); // Keep the last unfinished line
+
+    //   for (let line of lines) {
+    //     line = line.trim();
+    //     if (!line.startsWith("data: ")) continue;
+
+    //     const jsonString = line.slice(6); // remove 'data: '
+    //     if (jsonString === "[DONE]") return;
+
+    //     try {
+    //       const parsed = JSON.parse(jsonString);
+    //       const content = parsed.text || "";
+    //       data += content;
+    //     } catch (err) {
+    //       console.error("Parse error:", err, jsonString);
+    //     }
+    //   }
+    // }
   }
 </script>
 
 <div>
-  <p class="text-sm text-gray-500 dark:text-gray-400">
-    <button onclick={fetchSuggestions}>Agent Suggestions</button>
-    {data}
-  </p>
+  <button on:click={fetchSuggestions}>Get Suggestions</button>
+  <pre class="whitespace-pre-wrap">{data}</pre>
 </div>

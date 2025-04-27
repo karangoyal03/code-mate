@@ -5,6 +5,7 @@
   import Navbar from "./components/navbar.svelte";
   import Agent from "./components/Agent.svelte";
   import Bottom from "./components/Bottom.svelte";
+  import Voice from "./components/Voice.svelte";
 </script>
 
 <main>
@@ -18,5 +19,6 @@
       <Agent />
     </div>
   </div>
+  <Voice />
   <Bottom />
 </main>

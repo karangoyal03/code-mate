@@ -1,15 +1,15 @@
-import requests
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import StreamingResponse
+import requests
 import json
+import re
 router = APIRouter()
 
 @router.post("/get-suggestions")
-async def get_suggestions(request:Request):
-    print("request", await request.json())
+async def get_suggestions(request: Request):
     body = await request.json()
-    print("body", body)
     code = body["code"]
+
     prompt = f"""
     Act as a code mentor. Review the code below and suggest:
     - Refactoring opportunities
@@ -19,32 +19,50 @@ async def get_suggestions(request:Request):
 
     Code:
     {code}
-        """
-    response = requests.post(
-    url="https://openrouter.ai/api/v1/chat/completions",
-    headers={
-        "Authorization": "Bearer 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",
-        "Content-Type": "application/json",
-    },
-    data=json.dumps({
-        "model": "meta-llama/llama-4-maverick",
-        "stream": True,
-        "messages": [
-        {
-            "role": "user",
-            "content": prompt
-        }
-        ],
-        
-    })
-    )
+    """
+    def parse_streamed_chunks(raw_data: str):
+    # Extract JSON blocks using regex
+        json_blocks = re.findall(r'\{(?:[^{}]|(?R))*\}', raw_data, re.DOTALL)
+
+        # Parse each block
+        parsed_chunks = [json.loads(block) for block in json_blocks]
+
+        # Extract and concatenate the "content" from each chunk
+        final_content = ''.join(chunk["choices"][0]["delta"].get("content", "") for chunk in parsed_chunks)
+        return final_content
+        # Return as a JSON response
+        # return JSONResponse(content={"response": final_content})
+
+    def stream_openrouter():
+        with requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": "Bearer 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",
+                "Content-Type": "application/json",
+            },
+            stream=True,
+            data=json.dumps({
+                "model": "meta-llama/llama-4-maverick",
+                "stream": True,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            }),
+        ) as r:
+            for line in r.iter_lines(decode_unicode=True):
+                if line.startswith("data:"):
+                    clean = line[len("data:"):].strip()
+                    if clean != "[DONE]":
+                        try:
+                            parsed = json.loads(clean)
+                            yield json.dumps(parsed) + "\n"
+                        except json.JSONDecodeError:
+                            continue                    
+    return parse_streamed_chunks(stream_openrouter())
+    # json_blocks = re.findall(r'\{(?:[^{}]|(?R))*\}', stream_openrouter() , re.DOTALL)
+    # parsed_chunks = [json.loads(block) for block in json_blocks]
     
-    print('response',response)
-    # if response.headers.get("Content-Type") == "application/json":
-    #     return JSONResponse(content=response.json(), status_code=response.status_code)
-    # else:
-    #     return JSONResponse(
-    #         content={"error": "Non-JSON response", "text": response.text},
-    #         status_code=response.status_code
-    #     )
-    
+    # return StreamingResponse(, media_type="application/json")
